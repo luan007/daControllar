@@ -3,6 +3,144 @@
 <head>
     <title>EM-Controller</title>
     <style>
+        /**
+* mdtoggle.css
+* Author: Pedro Laxe
+* Version: 1.0.2
+* License: GPLv2
+**/
+
+        .mdl-textfield {
+            width: 100% !important;
+        }
+
+        label.input-toggle {
+            line-height: 0;
+            font-size: 0;
+            display: inline-block;
+            margin: 0;
+        }
+
+        label.input-toggle>span {
+            display: inline-block;
+            position: relative;
+            background-image: -webkit-linear-gradient(left, #848484 0%, #848484 50%, #7cbcbf 50%, #7cbcbf 100%);
+            background-image: linear-gradient(to right, #848484 0%, #848484 50%, #7cbcbf 50%, #7cbcbf 100%);
+            background-size: 64px 14px;
+            background-position: 0%;
+            border-radius: 32px;
+            width: 32px;
+            height: 14px;
+            cursor: pointer;
+            -webkit-transition: background-position 0.2s ease-in;
+            transition: background-position 0.2s ease-in;
+        }
+
+        label.input-toggle>input:checked+span {
+            background-position: -100%;
+        }
+
+        label.input-toggle>span:after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #F1F1F1;
+            -webkit-align-self: center;
+            -ms-flex-item-align: center;
+            align-self: center;
+            top: 50%;
+            left: 0;
+            -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+            border-radius: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            -webkit-transition: left 0.2s ease-in, background-color 0.2s ease-in, -webkit-transform 0.3s ease;
+            transition: left 0.2s ease-in, background-color 0.2s ease-in, -webkit-transform 0.3s ease;
+            transition: left 0.2s ease-in, background-color 0.2s ease-in, transform 0.3s ease;
+            transition: left 0.2s ease-in, background-color 0.2s ease-in, transform 0.3s ease, -webkit-transform 0.3s ease;
+        }
+
+        label.input-toggle>input:checked+span:after {
+            left: calc(100% - 18px);
+            background-color: #1D8B90;
+        }
+
+        label.input-toggle>input:active+span::after {
+            box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 1px 5px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 10px rgba(124, 188, 191, 0.5);
+        }
+
+        label.input-toggle>input:disabled:active+span::after {
+            box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 1px 5px 0px rgba(0, 0, 0, 0.12), 0px 0px 0px 10px rgba(0, 0, 0, 0.09);
+        }
+
+        label.input-toggle>span:active:after {
+            -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+
+        label.input-toggle>input:disabled+span:active:after {
+            -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+
+        label.input-toggle>input:disabled+span {
+            cursor: default;
+        }
+
+        label.input-toggle>input:disabled+span {
+            background: #D5D5D5;
+        }
+
+        label.input-toggle>input:disabled+span:after {
+            background: #BDBDBD;
+        }
+
+        label.input-toggle>input {
+            display: block;
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        /* Large */
+
+        label.input-toggle.large>span {
+            width: 60px;
+            height: 20px;
+            background-size: 120px 25px;
+        }
+
+        label.input-toggle.large>span:after {
+            width: 30px;
+            height: 30px;
+        }
+
+        label.input-toggle.large>input:checked+span:after {
+            left: calc(100% - 30px);
+            background-color: #1D8B90;
+        }
+
+        label.input-toggle.large>input:disabled+span {
+            cursor: default;
+        }
+
+        label.input-toggle.large>input:disabled+span {
+            background: #D5D5D5;
+        }
+
+        label.input-toggle.large>input:disabled+span:after {
+            background: #BDBDBD;
+        }
+        /*
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }*/
+
         .mdl-layout__tab-bar-right-button {
             display: none !important;
         }
@@ -23,6 +161,12 @@
             font-size: 20px !important;
             line-height: 40px !important;
             text-align: center;
+        }
+
+        .mdl-textfield,
+        .mdl-textfield * {
+            user-select: all;
+            -webkit-user-select: all;
         }
     </style>
     <meta name="viewport" content="width=device-width, user-scalable=no">
@@ -46,7 +190,7 @@
             </div>
             <!-- Tabs -->
             <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-                <a v-for="(n,v) in tabs" v-bind:href='"#maintab-" + v' class="mdl-layout__tab">
+                <a v-for="(n,v) in tabs" v-bind:href='"#maintab-" + hash(v)' class="mdl-layout__tab">
                     {{v}}
                 </a>
             </div>
@@ -55,39 +199,106 @@
             <span class="mdl-layout-title">Controller v1</span>
         </div>
         <main class="mdl-layout__content">
-            <section v-for="(tab,v) in tabs" class="mdl-layout__tab-panel" v-bind:id='"maintab-" + v'>
+            <section v-for="(tab,v) in tabs" class="mdl-layout__tab-panel" v-bind:id='"maintab-" + hash(v)'>
                 <div class="page-content">
                     <div v-for="(group,q) in tab" class="demo-card-wide mdl-card mdl-shadow--2dp">
-                        <div class="mdl-card__title">
+                        <div v-if='q.indexOf("*") == -1' class="mdl-card__title">
                             <h2 class="mdl-card__title-text">{{q}}</h2>
                         </div>
-                        <div class="mdl-card__actions mdl-card--border">
-                            <ul class="demo-list-two mdl-list">
-                                <li v-for="item in group" class="mdl-list__item mdl-list__item--two-line">
-                                    <span class="mdl-list__item-primary-content">
-                                        <i class="material-icons mdl-list__item-avatar">{{item.icon}}</i>
-                                        <span>{{item.name}}</span>
-                                    <span class="mdl-list__item-sub-title">
-                                        <i class="material-icons">{{health_icon(item)}}</i>
-                                        {{health(item)}}
-                                    </span>
-                                    </span>
-                                    <span class="mdl-list__item-secondary-content">
-                                        <span class="mdl-list__item-secondary-action">
-                                           <button v-if="item.type == 'bang'" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">执行</button>
-                                           <label v-if="item.type == 'switch'" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" v-bind:for="'switch-' + idFor(item)">
-                                                <input type="checkbox" v-bind:id = "'switch-' + idFor(item)" class="mdl-switch__input" v-model="item.value">
-                                            </label>
+                        <template v-if='q.indexOf("*") > -1'>
+                            <div class="mdl-card__actions mdl-card--border">
+                                <ul class="demo-list-item mdl-list">
+                                    <div class="mdl-card__title-text">
+                                        城
+                                    </div>
+                                    <li v-for='(m, n) in labels.cities' style='padding: 0;' class="mdl-list__item">
+                                        <span style='font-size:12px; white-space:nowrap;' v-on:click='pickData(m, "cities",group[0])' class="mdl-list__item-primary-content mdl-button">
+                                            {{m}}
                                         </span>
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
+                                    </li>
+                                    <div class="mdl-card__title-text">
+                                        县
+                                    </div>
+                                    <li v-for='(m, n) in labels.counties' style='padding: 0' class="mdl-list__item">
+                                        <span style='font-size:12px; white-space:nowrap;' v-on:click='pickData(m, "counties",group[0])' class="mdl-list__item-primary-content mdl-button">
+                                             {{m}}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </template>
+                        <template v-if='q.indexOf("#") > -1'>
+                            <div class="mdl-card__actions mdl-card--border">
+                                <input class="mdl-textfield__input" placeholder="筛选" style='font-size: 20px' v-model="search" type="text" v-bind:id="'selector_' + q">
+                                <ul class="demo-list-item mdl-list">
+                                    <li style='padding: 0' class="mdl-list__item">
+                                        <span v-on:click='pick("", "", group[0])' class="mdl-list__item-primary-content mdl-button">
+                                                全国
+                                            </span>
+                                    </li>
+                                    <div class="mdl-card__supporting-text">
+                                        省份
+                                    </div>
+                                    <li v-for='m in filteredmap().provinces' style='padding: 0' class="mdl-list__item">
+                                        <span v-on:click='pick(m.raw, "provinces",group[0])' class="mdl-list__item-primary-content mdl-button">
+                                                {{m.raw}}
+                                            </span>
+                                    </li>
+                                    <div class="mdl-card__supporting-text">
+                                        城市
+                                    </div>
+                                    <li v-for='m in filteredmap().cities' style='padding: 0' class="mdl-list__item">
+                                        <span v-on:click='pick(m.raw, "cities",group[0])' class="mdl-list__item-primary-content mdl-button">
+                                                {{m.raw}}
+                                            </span>
+                                    </li>
+                                    <div class="mdl-card__supporting-text">
+                                        县区
+                                    </div>
+                                    <li v-for='m in filteredmap().counties' style='padding: 0' class="mdl-list__item">
+                                        <span v-on:click='pick(m.raw, "counties",group[0])' class="mdl-list__item-primary-content mdl-button">
+                                                {{m.raw}}
+                                            </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </template>
+                        <template v-if='q.indexOf("#") == -1 && q.indexOf("*") == -1'>
+                            <div class="mdl-card__actions mdl-card--border">
+                                <ul class="demo-list-two mdl-list">
+                                    <li v-for="item in group" class="mdl-list__item mdl-list__item--two-line">
+                                        <span class="mdl-list__item-primary-content">
+                                            <i class="material-icons mdl-list__item-avatar">{{item.icon}}</i>
+                                            <span>{{item.name}}</span>
+                                        <span class="mdl-list__item-sub-title">
+                                                <i class="material-icons">{{health_icon(item)}}</i>
+                                                {{health(item)}}
+                                            </span>
+                                        </span>
+                                        <span class="mdl-list__item-secondary-content">
+                                            <span class="mdl-list__item-secondary-action">
+                                            <button v-on:click="bang(item)" v-if="item.type == 'bang'" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">执行</button>
+                                            <!--<label  v-if="item.type == 'switch'" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" v-bind:for="'switch-' + idFor(item)">-->
+                                                    <!--<input type="checkbox" v-bind:id = "'switch-' + idFor(item)" class="mdl-switch__input">-->
+                                                <!--</label>-->
+                                                <label  v-on:click="sw(item, $event)" v-if="item.type == 'switch'" class="input-toggle large">
+                                                    <input type="checkbox" v-model="item.value">
+                                                    <span></span>
+                                        </label>
+                                        </span>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </section>
         </main>
     </div>
+    <script src='./pinyinlite_full.min.js'></script>
+    <script src='./fuzzy.js'></script>
+    <script src='./combined.js'></script>
     <script src="./material.min.js"></script>
     <script src="./vue.js"></script>
     <script src='./client.js'></script>

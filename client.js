@@ -1,18 +1,9 @@
-
-var items = [{
-    tab: "视频控制", group: "青花瓷",
-    value: 0,
-    type: "bang",
-    name: "重播",
-    icon: "play_arrow"
-}];
+var _items;
+var idSet = {};
+var cbs = {};
 
 function idFor(item) {
     return hashCode(item.name + item.group + item.tab + item.desc);
-}
-
-for (var i = 0; i < items.length; i++) {
-    items[i].id = idFor(items[i]);
 }
 
 function hashCode(str) {
@@ -26,19 +17,49 @@ function hashCode(str) {
     return hash;
 }
 
-function start(path, items) {
-    var items = items;
-    var socket = require('socket.io-client')(path);
+var socket = undefined;
+
+function sendUpdate() {
+    if (socket) {
+        socket.emit('packet', _items);
+    }
+}
+
+function start(path, registry) {
+    _items = registry;
+    for (var i = 0; i < registry.length; i++) {
+        registry[i].id = idFor(registry[i]);
+        var cb = registry[i].cb;
+        idSet[registry[i].id] = registry[i];
+        cbs[registry[i].id] = cb;
+        delete registry[i].cb;
+    }
+
+    socket = require('socket.io-client')(path);
     socket.on('connect', function () {
         console.log("connected to server");
     });
     socket.on('update', function (data) {
-        socket.emit('packet', items);
+        sendUpdate();
     });
     socket.on('disconnect', function () {
         console.log("disconnected from server");
     });
+
+    socket.on("command", function (dt) {
+        if (!dt) return;
+        if (!idSet[dt.id]) {
+            return;
+        }
+        if (dt.value != idSet[dt.id].value) {
+            if(idSet[dt.id].type == 'bang') {
+                idSet[dt.id].value = dt.value;
+            }
+            cbs[dt.id](dt.value, idSet[dt.id].value, idSet[dt.id]);
+            sendUpdate();
+        }
+    });
     socket.connect();
 }
 
-start('http://localhost:9999', items);
+module.exports.start = start;
