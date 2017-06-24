@@ -1,0 +1,96 @@
+<html>
+
+<head>
+    <title>EM-Controller</title>
+    <style>
+        .mdl-layout__tab-bar-right-button {
+            display: none !important;
+        }
+
+        .mdl-layout__tab-bar-left-button {
+            display: none !important;
+        }
+
+        .demo-card-wide {
+            width: 100% !important;
+        }
+
+        .material-icons {
+            vertical-align: middle;
+        }
+
+        i.material-icons.mdl-list__item-avatar {
+            font-size: 20px !important;
+            line-height: 40px !important;
+            text-align: center;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link rel="stylesheet" href="./material.min.css">
+    <link rel="stylesheet" href="material-icons.css">
+    <script src="/socket.io/socket.io.js"></script>
+
+</head>
+
+<body>
+    <div id='app' class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title">C&C 指令器
+                </span>
+                <div class="mdl-layout-spacer"></div>
+                <span class="mdl-layout-subtitle">
+                    <i class='material-icons'>{{serverHealth()}}</i>
+                </span>
+            </div>
+            <!-- Tabs -->
+            <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+                <a v-for="(n,v) in tabs" v-bind:href='"#maintab-" + v' class="mdl-layout__tab">
+                    {{v}}
+                </a>
+            </div>
+        </header>
+        <div class="mdl-layout__drawer">
+            <span class="mdl-layout-title">Controller v1</span>
+        </div>
+        <main class="mdl-layout__content">
+            <section v-for="(tab,v) in tabs" class="mdl-layout__tab-panel" v-bind:id='"maintab-" + v'>
+                <div class="page-content">
+                    <div v-for="(group,q) in tab" class="demo-card-wide mdl-card mdl-shadow--2dp">
+                        <div class="mdl-card__title">
+                            <h2 class="mdl-card__title-text">{{q}}</h2>
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <ul class="demo-list-two mdl-list">
+                                <li v-for="item in group" class="mdl-list__item mdl-list__item--two-line">
+                                    <span class="mdl-list__item-primary-content">
+                                        <i class="material-icons mdl-list__item-avatar">{{item.icon}}</i>
+                                        <span>{{item.name}}</span>
+                                    <span class="mdl-list__item-sub-title">
+                                        <i class="material-icons">{{health_icon(item)}}</i>
+                                        {{health(item)}}
+                                    </span>
+                                    </span>
+                                    <span class="mdl-list__item-secondary-content">
+                                        <span class="mdl-list__item-secondary-action">
+                                           <button v-if="item.type == 'bang'" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">执行</button>
+                                           <label v-if="item.type == 'switch'" class="mdl-switch mdl-js-switch mdl-js-ripple-effect" v-bind:for="'switch-' + idFor(item)">
+                                                <input type="checkbox" v-bind:id = "'switch-' + idFor(item)" class="mdl-switch__input" v-model="item.value">
+                                            </label>
+                                        </span>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="./material.min.js"></script>
+    <script src="./vue.js"></script>
+    <script src='./client.js'></script>
+</body>
+
+</html>
